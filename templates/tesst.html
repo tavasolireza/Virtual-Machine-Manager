@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        $(document).ready(function () {
+            $('.searchType').click(function () {
+                alert($(this).attr('id'));  //-->this will alert id of checked checkbox.
+                if (this.checked) {
+                    $.ajax({
+                        type: "POST",
+                        url: 'searchOnType.jsp',
+                        data: $(this).attr('id'), //--> send id of checked checkbox on other page
+                        success: function (data) {
+                            alert('it worked');
+                            alert(data);
+                            $('#container').html(data);
+                        },
+                        error: function () {
+                            alert('it broke');
+                        },
+                        complete: function () {
+                            alert('it completed');
+                        }
+                    });
+
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<input class="searchType" type="checkbox" name="emailNotification" id="emailNotification"><label
+        class="searchtype1label">Email Notification</label></input>
+<input class="searchType" type="checkbox" name="SharingNotification" id="SharingNotification"><label
+        class="searchtype2label">File Sharing Notification</label></input>
+</body>
+</html>
