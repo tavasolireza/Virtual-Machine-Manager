@@ -1,31 +1,46 @@
 $(document).ready(function () {
 
 
-    $('#vm1wrapper').on('click', '#NCMMSend1', function () {
-        console.log("333")
+    $(".NCMMSend").click(function (e) {
+        // alert(this.id);
+        let el_id = this.id;
+        let el_no = el_id.charAt(el_id.length - 1);
+        // alert(el_id.charAt(el_id.length - 1));
+        let cpu_no = "#NoC".concat(el_no);
+        let mem_no = "#MMS".concat(el_no);
+        // alert(cpu_no);
         // $("#NCMMSend1").prop('value', 'Save');
-        var cpu = $("#NoC1").val();
-        var memory = $("#MMS1").val();
+        var cpu = $(cpu_no).val();
+        var memory = $(mem_no).val();
         $.ajax({
             url: "/vm_cpu_memory",
             type: "get",
-            data: {cpu: cpu, memory: memory},
+            data: {cpu: cpu, memory: memory, el_id: el_id},
             success: function (response) {
-                $(".result").html('<p>' + response.result.toString() + '</p>');
+                let result_no = "#output".concat(el_no);
+                $(result_no).html('<p>' + response.result_stdout + '</p>'
+                    + '<p>' + response.result_error.toString() + '</p>');
+                // $(".result").html('<p>' + response.result.toString() + '</p>');
                 // $(".get_result").html('Sffffffave');
             },
         })
     });
 
-    $('#vm1cmdwrapper').on('click', '#MessageSend1', function () {
-        var commands = $("#Message1").val();
-        console.log(commands)
+    $(".messageSend").click(function (e) {
+        // alert(this.id);
+        let el_id = this.id;
+        let el_no = el_id.charAt(el_id.length - 1);
+        let message_no = "#message".concat(el_no);
+        let commands = $(message_no).val();
+        // console.log(commands)
         $.ajax({
             url: "/vm_command",
             type: "get",
-            data: {commands: commands},
+            data: {commands: commands, el_id: el_id},
             success: function (response) {
-                $(".resultCmd").html('<p>' + response.result.toString() + '</p>');
+                let result_no = "#output".concat(el_no);
+                $(result_no).html('<p>' + response.result_stdout + '</p>'
+                    + '<p>' + response.result_error.toString() + '</p>');
             },
         })
     });
@@ -58,32 +73,53 @@ $(document).ready(function () {
     //         },
     //     })
     // });
-    $("a#clone1click").click(function (e) {
+    $("a.cloneClick").click(function (e) {
         e.preventDefault();
-        console.log("clone1");
-        var val1 = 999;
+        // alert(this.id);
+        let el_id = this.id;
+        let el_no = el_id.charAt(el_id.length - 1);
         $.ajax({
-            url: "/vm_on",
+            url: "/vm_clone",
             type: "get",
-            // data: {val1: val1},
+            data: {el_id: el_id},
             success: function (response) {
-                console.log("clone success")
+                let result_no = "#output".concat(el_no);
+                            $(result_no).html('<p>' + response.result_stdout + '</p>'
+                                + '<p>' + response.result_error.toString() + '</p>');
             },
         })
     });
-        $("a#delete1click").click(function (e) {
+
+    $("a.deleteClick").click(function (e) {
         e.preventDefault();
-        console.log("clone1");
-        var val1 = 999;
+        // alert(this.id);
+        let el_id = this.id;
+        let el_no = el_id.charAt(el_id.length - 1);
         $.ajax({
-            url: "/vm1_off",
+            url: "/vm_delete",
             type: "get",
-            // data: {val1: val1},
+            data: {el_id: el_id},
             success: function (response) {
-                console.log("clone success")
+                let result_no = "#output".concat(el_no);
+                            $(result_no).html('<p>' + response.result_stdout + '</p>'
+                                + '<p>' + response.result_error.toString() + '</p>');
             },
         })
     });
+
+    //     $("a#delete1click").click(function (e) {
+    //     e.preventDefault();
+    //     console.log("clone1");
+    //     var val1 = 999;
+    //     $.ajax({
+    //         url: "/vm1_off",
+    //         type: "get",
+    //         // data: {val1: val1},
+    //         success: function (response) {
+    //             console.log("clone success")
+    //         },
+    //     })
+    // });
 
 
     // $('a#clone1click').on('click', function (e) {

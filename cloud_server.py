@@ -15,12 +15,17 @@ def home():
 
 @app.route('/vm_on')
 def vm_on():
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
     # subprocess.call(["VBoxManage", "controlvm", "vm1", "poweroff"])
-    command = ["VBoxManage", "startvm", "vm1"]
+    command = ["VBoxManage", "startvm", vm_no]
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     print(result.returncode, result.stdout, result.stderr)
     # subprocess.call(["VBoxManage", "startvm", "vm1"])
-    return "nothing"
+    # return "nothing"
+    return jsonify(
+        {"result_stdout": result.stdout, "result_error": result.stderr})
 
 
 # background process happening without any refreshing
@@ -32,39 +37,53 @@ def vm_on():
 #     return "nothing"
 #
 #
-@app.route('/vm1_off')
+@app.route('/vm_off')
 def vm_off():
-    print('koonah')
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
     # subprocess.call(["VBoxManage", "controlvm", "vm1", "poweroff"])
-    command = ["VBoxManage", "controlvm", "vm1", "poweroff"]
+    command = ["VBoxManage", "controlvm", vm_no, "poweroff"]
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     print(result.returncode, result.stdout, result.stderr)
-    return "nothing"
+    return jsonify(
+        {"result_stdout": result.stdout, "result_error": result.stderr})
 
 
 @app.route('/vm_cpu_memory')
 def vm_change_cpu_memory():
-    print("came here")
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
     a = int(request.args.get('cpu'))
     b = int(request.args.get('memory'))
-    command1 = ["VBoxManage", "modifyvm", "vm1", "--memory", str(b)]
+    command1 = ["VBoxManage", "modifyvm", vm_no, "--memory", str(b)]
     result1 = run(command1, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     print(result1.returncode, result1.stdout, result1.stderr)
 
-    command2 = ["VBoxManage", "modifyvm", "vm1", "--cpus", str(a)]
+    command2 = ["VBoxManage", "modifyvm", vm_no, "--cpus", str(a)]
     result2 = run(command2, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     print(result2.returncode, result2.stdout, result2.stderr)
+    change_prompt = ""
+    if len(result1.stderr) < 5 and len(result2.stderr) < 5:
+        change_prompt = "Changed CPU and memory successfuly"
+    else:
+        change_prompt=result1.stderr + " " + result2.stderr
     # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--memory", str(b)])
     # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--cpus", str(a)])
-    return jsonify({"result": a + b})
+    return jsonify(
+        {"result_stdout": result1.stdout + " " + result2.stdout, "result_error": change_prompt})
 
 
 @app.route('/vm_command')
 def vm_command():
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
     commands = request.args.get('commands')
     commands = commands.split()
     print(commands)
-    cmd_list = ["VBoxManage", "guestcontrol", "vm1", "--username", "reza", "--password", "19422010", "run", "--exe",
+    cmd_list = ["VBoxManage", "guestcontrol", vm_no, "--username", "reza", "--password", "19422010", "run", "--exe",
                 f"/bin/{commands[0]}", f"{commands[0]}"]
     if len(commands) > 1:
         cmd_list += commands[1:]
@@ -75,7 +94,9 @@ def vm_command():
     # subprocess.call(["VBoxManage", "guestcontrol", "vm1", "----username", str(b), "--password", str(a), ])
     # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--cpus", str(a)])
     # return jsonify({"result": a + b})
-    return jsonify({"result": result.stdout})
+    # return jsonify({"result": result.stdout})
+    return jsonify(
+        {"result_stdout": result.stdout, "result_error": result.stderr})
 
 
 #
@@ -85,12 +106,39 @@ def vm_command():
 #     subprocess.call(["VBoxManage", "unregistervm", "vm33", "-delete"])
 #     return None
 #
-# @app.route('/vm_clone')
-# def vm_clone():
-#     print("clone kardi?????")
-#     subprocess.call(["VBoxManage", "clonevm", "vm1", "--register"])
-#     print("clone kardi?????")
-#     return None
+
+@app.route('/vm_delete')
+def vm_delete():
+    # print("clone kardi?????")
+    # subprocess.call(["VBoxManage", "clonevm", "vm1", "--register"])
+    # print("clone kardi?????")
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
+    command = ["VBoxManage", "unregistervm", vm_no, "-delete"]
+    result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    print(result.returncode, result.stdout, result.stderr)
+    # return "nothing"
+    return jsonify(
+        {"result_stdout": result.stdout, "result_error": result.stderr})
+
+
+@app.route('/vm_clone')
+def vm_clone():
+    # print("clone kardi?????")
+    # subprocess.call(["VBoxManage", "clonevm", "vm1", "--register"])
+    # print("clone kardi?????")
+    vm_no = request.args.get('el_id')[-1]
+    print(vm_no)
+    vm_no = "vm" + vm_no
+    command = ["VBoxManage", "clonevm", vm_no, "--register"]
+    result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    print(result.returncode, result.stdout, result.stderr)
+    # return "nothing"
+    return jsonify(
+        {"result_stdout": result.stdout, "result_error": result.stderr})
+
+
 #
 @app.route('/calculate_result')
 def calculate_result():
