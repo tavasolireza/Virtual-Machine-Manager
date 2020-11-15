@@ -50,6 +50,23 @@ def vm_off():
         {"result_stdout": result.stdout, "result_error": result.stderr})
 
 
+@app.route('/vm_running')
+def vm_running():
+    command1 = ["VBoxManage", "list", "vms"]
+    all_vms = run(command1, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    print(all_vms.returncode, all_vms.stdout, all_vms.stderr)
+    all_vms = all_vms.stdout.replace("\""," ").split()[0::2]
+
+    command2 = ["VBoxManage", "list", "runningvms"]
+    running_vms = run(command2, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    print(running_vms.returncode, running_vms.stdout, running_vms.stderr)
+    running_vms = running_vms.stdout.replace("\""," ").split()[0::2]
+    # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--memory", str(b)])
+    # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--cpus", str(a)])
+    return jsonify(
+        {"all_vms": all_vms, "running_vms": running_vms})
+
+
 @app.route('/vm_cpu_memory')
 def vm_change_cpu_memory():
     vm_no = request.args.get('el_id')[-1]
@@ -68,7 +85,7 @@ def vm_change_cpu_memory():
     if len(result1.stderr) < 5 and len(result2.stderr) < 5:
         change_prompt = "Changed CPU and memory successfuly"
     else:
-        change_prompt=result1.stderr + " " + result2.stderr
+        change_prompt = result1.stderr + " " + result2.stderr
     # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--memory", str(b)])
     # subprocess.call(["VBoxManage", "modifyvm", "vm1", "--cpus", str(a)])
     return jsonify(
@@ -125,13 +142,14 @@ def vm_delete():
 
 @app.route('/vm_clone')
 def vm_clone():
-    # print("clone kardi?????")
+    print("clone kardi?????")
     # subprocess.call(["VBoxManage", "clonevm", "vm1", "--register"])
     # print("clone kardi?????")
     vm_no = request.args.get('el_id')[-1]
+    vm_count_no = int(request.args.get('vm_count_no'))
     print(vm_no)
     vm_no = "vm" + vm_no
-    command = ["VBoxManage", "clonevm", vm_no, "--register"]
+    command = ["VBoxManage", "clonevm", vm_no, f"--name=vm{vm_count_no}", "--register"]
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     print(result.returncode, result.stdout, result.stderr)
     # return "nothing"
