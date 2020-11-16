@@ -1,8 +1,7 @@
 let vm_count_no = 1;
 
-
 function create(vm_count) {
-    var new_vm = `        <div class='w3-third'>
+    var new_vm = `        <div class='w3-third vm_box'>
             <div class='w3-white   w3-card-4 w3-round-large'>
                 <div class='w3-display-container LeftCont '>
                     <div class='w3-row-padding'>
@@ -16,7 +15,6 @@ function create(vm_count) {
                             </div>
                             <div style='margin-top: 0%;' class='w3-rest w3-container  w3-round-large PageName'>
                                 <form>
-                                    <!--                                    <a href=# id='myonoffswitch1click'>-->
                                     <div class='onoffswitch'>
                                         <input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox'
                                                id='myonoffswitch${vm_count}' tabindex='0'>
@@ -25,7 +23,6 @@ function create(vm_count) {
                                             <span class='onoffswitch-switch'></span>
                                         </label>
                                     </div>
-                                    <!--                                    </a>-->
                                 </form>
                             </div>
 
@@ -77,7 +74,6 @@ function create(vm_count) {
                                     class='w3-button w3-block w3-section  w3-round-large w3-indigo w3-ripple w3-padding NCMMSend'>
                                 Send
                             </button>
-                            <!--                            <div class='result'>nnnnnn</div>-->
                         </div>
                         <div class='vmCmdWrapper' id='vmCmdWrapper${vm_count}'>
                             <div class='w3-row w3-section'>
@@ -117,41 +113,60 @@ $(document).ready(function () {
     $.ajax({
         url: '/vm_running',
         type: 'get',
-        // data: {el_id: el_id},
         success: function (response) {
-            // console.log(response.all_vms);
             let all_vms = response.all_vms;
             let running_vms = response.running_vms;
+            vm_count_no=parseInt(all_vms.sort().slice(-1)[0].slice(2,));
             let x_all;
             let y_running;
             $("#vm_grid").html("");
             for (x_all of all_vms) {
                 console.log(x_all.slice(2,));
-
                 $("#vm_grid").append(create(x_all.slice(2,)));
             }
             for (y_running of running_vms) {
                 console.log(y_running.slice(2,));
-                el_name=`#myonoffswitch${y_running.slice(2,)}`;
-                $( el_name ).prop( "checked", true );
+                let el_name = `#myonoffswitch${y_running.slice(2,)}`;
+                $(el_name).prop("checked", true);
             }
-            // let result_no = '#output'.concat(el_no);
-            // $(result_no).html('<p>' + response.result_stdout + '</p>'
-            //     + '<p>' + response.result_error.toString() + '</p>');
         },
     });
 });
 
+ $(document).on('change','.onoffswitch-checkbox', function () {
+                let el_id = this.id;
+                let el_no = el_id.slice(14,);
+                if (this.checked) {
+                    $.ajax({
+                        url: '/vm_on',
+                        type: 'get',
+                        data: {el_id: el_id},
+                        success: function (response) {
+                            let result_no = '#output'.concat(el_no);
+                            $(result_no).html('<p>' + response.result_stdout + '</p>'
+                                + '<p>' + response.result_error.toString() + '</p>');
+                        },
+                    });
+                } else {
+                    $.ajax({
+                        url: '/vm_off',
+                        type: 'get',
+                        data: {el_id: el_id},
+                        success: function (response) {
+                            let result_no = '#output'.concat(el_no);
+                            $(result_no).html('<p>' + 'shutting down' + '</p>'+
+                                '<p>' + response.result_stdout + '</p>'
+                                + '<p>' + response.result_error.toString() + '</p>');
+                        },
+                    });
+                }
+            });
+
 $(document).on('click', '.NCMMSend', function () {
-    // $(".NCMMSend").click(function (e) {
-    // alert(this.id);
     let el_id = this.id;
-    let el_no = el_id.charAt(el_id.length - 1);
-    // alert(el_id.charAt(el_id.length - 1));
+    let el_no = el_id.slice(8,);
     let cpu_no = "#NoC".concat(el_no);
     let mem_no = "#MMS".concat(el_no);
-    // alert(cpu_no);
-    // $("#NCMMSend1").prop('value', 'Save');
     var cpu = $(cpu_no).val();
     var memory = $(mem_no).val();
     $.ajax({
@@ -162,20 +177,15 @@ $(document).on('click', '.NCMMSend', function () {
             let result_no = "#output".concat(el_no);
             $(result_no).html('<p>' + response.result_stdout + '</p>'
                 + '<p>' + response.result_error.toString() + '</p>');
-            // $(".result").html('<p>' + response.result.toString() + '</p>');
-            // $(".get_result").html('Sffffffave');
         },
     })
 });
 
 $(document).on('click', '.messageSend', function () {
-// $(".messageSend").click(function (e) {
-    // alert(this.id);
     let el_id = this.id;
-    let el_no = el_id.charAt(el_id.length - 1);
+    let el_no = el_id.slice(11,);
     let message_no = "#message".concat(el_no);
     let commands = $(message_no).val();
-    // console.log(commands)
     $.ajax({
         url: "/vm_command",
         type: "get",
@@ -188,43 +198,15 @@ $(document).on('click', '.messageSend', function () {
     })
 });
 
-// $('.wrapper').on('click', '.get_result', function () {
-//     console.log("333")
-//     $("#btnAddProfile").prop('value', 'Save');
-//     var val1 = $("#input_A").val();
-//     var val2 = $("#input_B").val();
-//     $.ajax({
-//         url: "/calculate_result",
-//         type: "get",
-//         data: {val1: val1, val2: val2},
-//         success: function (response) {
-//             console.log("mmcvbxvb")
-//             $(".result").html('<p>' + response.result.toString() + '</p>');
-//             $(".get_result").html('Sffffffave');
-//         },
-//     })
-// });
 
-// $("a#delete1click").click(function (e) {
-//     e.preventDefault();
-//     $.ajax({
-//         url: "/vm1_on",
-//         type: "get",
-//         // data: {val1: val1},
-//         success: function (response) {
-//             console.log("delete success")
-//         },
-//     })
-// });
 $(document).on('click', 'a.cloneClick', function (e) {
-// $("a.cloneClick").click(function (e) {
     e.preventDefault();
     vm_count_no = vm_count_no + 1
-    $("#vm_grid").append(create(vm_count_no));
-    // document.getElementById('vm_grid').appendChild(create());
-    // alert(this.id);
+    // $("#vm_grid").append(create(vm_count_no));
     let el_id = this.id;
-    let el_no = el_id.charAt(el_id.length - 1);
+    let el_no = el_id.slice(10,);
+    console.log("below is el_no");
+    console.log(el_no);
     $.ajax({
         url: "/vm_clone",
         type: "get",
@@ -233,110 +215,27 @@ $(document).on('click', 'a.cloneClick', function (e) {
             let result_no = "#output".concat(el_no);
             $(result_no).html('<p>' + response.result_stdout + '</p>'
                 + '<p>' + response.result_error.toString() + '</p>');
+            console.log(`length of error is ${response.result_error.toString().length}`);
+            console.log(`khode of error is ${response.result_error.toString()}`);
+            if (response.result_error.toString().length < 100){
+                $("#vm_grid").append(create(vm_count_no));
+            }
+
         },
     })
 });
 
 $(document).on('click', 'a.deleteClick', function (e) {
-// $("a.deleteClick").click(function (e) {
     e.preventDefault();
-    // alert(this.id);
     let el_id = this.id;
-    let el_no = el_id.charAt(el_id.length - 1);
+    console.log( el_id)
+    let el_no = el_id.slice(11,);
     $.ajax({
         url: "/vm_delete",
         type: "get",
         data: {el_id: el_id},
         success: function (response) {
-            let result_no = "#output".concat(el_no);
-            $(result_no).html('<p>' + response.result_stdout + '</p>'
-                + '<p>' + response.result_error.toString() + '</p>');
+            $(`#${el_id}`).closest('.vm_box').remove();
         },
     })
 });
-
-//     $("a#delete1click").click(function (e) {
-//     e.preventDefault();
-//     console.log("clone1");
-//     var val1 = 999;
-//     $.ajax({
-//         url: "/vm1_off",
-//         type: "get",
-//         // data: {val1: val1},
-//         success: function (response) {
-//             console.log("clone success")
-//         },
-//     })
-// });
-
-
-// $('a#clone1click').on('click', function (e) {
-//     e.preventDefault()
-//     $.getJSON('/ahmad',
-//         function (data) {
-//
-//         });
-//     return false;
-// });
-
-// $('a#clone1click').on('click', function (e) {
-//     e.preventDefault()
-//     $.getJSON('/ahmad',
-//         function (data) {
-//
-//         });
-//     return false;
-// });
-
-
-// $('#myonoffswitch1').on('change',function() {
-//         e.preventDefault();
-//         if(this.checked){
-//         alert("hiiiiii");
-//
-//         }
-//   });
-
-// $('.wrappp').on('click', '#emailNotification', function () {
-//     print('here4')
-//     alert($(this).attr('id'));  //-->this will alert id of checked checkbox.
-//     if (this.checked) {
-//         $.ajax({
-//             type: "get",
-//             url: '/calculate_result',
-//             data: $(this).attr('id'), //--> send id of checked checkbox on other page
-//             success: function (data) {
-//                 alert('it worked');
-//                 print('here1')
-//                 alert(data);
-//                 $('#container').html(data);
-//             },
-//             error: function () {
-//                 alert('it broke');
-//                 print('here2')
-//             },
-//             complete: function () {
-//                 alert('it completed');
-//                 print('here3')
-//             }
-//         });
-//
-//     }
-// });
-
-// $("#myonoffswitch1click").click(function() {
-//     e.preventDefault();
-//     alert("hi");
-//     // alert($(this).attr('id'));  //-->this will alert id of checked checkbox.
-//     if ($("#myonoffswitch1").checked) {
-//         $.ajax({
-//             type: "post",
-//             url: '/vm_on',
-//             // data: $(this).attr('id'), //--> send id of checked checkbox on other page
-//             success: function (data) {
-//
-//             }
-//         });
-//
-//     }
-// });
