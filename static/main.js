@@ -135,7 +135,7 @@ $(document).ready(function () {
 
  $(document).on('change','.onoffswitch-checkbox', function () {
                 let el_id = this.id;
-                let el_no = el_id.slice(14,);
+                let el_no = el_id.slice(13,);
                 if (this.checked) {
                     $.ajax({
                         url: '/vm_on',
@@ -205,8 +205,6 @@ $(document).on('click', 'a.cloneClick', function (e) {
     // $("#vm_grid").append(create(vm_count_no));
     let el_id = this.id;
     let el_no = el_id.slice(10,);
-    console.log("below is el_no");
-    console.log(el_no);
     $.ajax({
         url: "/vm_clone",
         type: "get",
@@ -215,8 +213,6 @@ $(document).on('click', 'a.cloneClick', function (e) {
             let result_no = "#output".concat(el_no);
             $(result_no).html('<p>' + response.result_stdout + '</p>'
                 + '<p>' + response.result_error.toString() + '</p>');
-            console.log(`length of error is ${response.result_error.toString().length}`);
-            console.log(`khode of error is ${response.result_error.toString()}`);
             if (response.result_error.toString().length < 100){
                 $("#vm_grid").append(create(vm_count_no));
             }
@@ -228,7 +224,6 @@ $(document).on('click', 'a.cloneClick', function (e) {
 $(document).on('click', 'a.deleteClick', function (e) {
     e.preventDefault();
     let el_id = this.id;
-    console.log( el_id)
     let el_no = el_id.slice(11,);
     $.ajax({
         url: "/vm_delete",
